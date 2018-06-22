@@ -4,6 +4,8 @@ import urlJoin from 'url-join';
 import urlParse from 'url-parse';
 import inherits from 'inherits';
 import { btoa } from 'pouchdb-binary-utils';
+import { assign } from "pouchdb-utils";
+import PouchDB from "pouchdb-core";
 
 function getBaseUrl(db) {
   // Parse database url
@@ -57,6 +59,28 @@ function getBasicAuthHeaders(db) {
   return {Authorization: 'Basic ' + token};
 }
 
+function doFetch(url, opts, callback) {
+  opts = assign(opts || {});
+
+  if (opts.body && typeof opts.body !== 'string') {
+    opts.body = JSON.stringify(opts.body);
+  }
+
+  PouchDB.fetch(url, opts).then(function (res) {
+    var ok = res.ok;
+    return res.json().then(function (content) {
+      if (ok) {
+        callback(null, content);
+      } else {
+        content.name = content.error;
+        callback(content);
+      }
+    });
+  }).catch(function (err) {
+    callback(err);
+  });
+}
+
 function wrapError(callback) {
   // provide more helpful error message
   return function (err, res) {
@@ -84,6 +108,7 @@ inherits(AuthError, Error);
 
 export {
   AuthError,
+  doFetch,
   getBaseUrl,
   getBasicAuthHeaders,
   getConfigUrl,

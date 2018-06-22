@@ -1,5 +1,8 @@
 'use strict';
 
+require('whatwg-fetch');
+require('promise-polyfill');
+
 var PouchDB = require('pouchdb-memory');
 var Authentication = require('../lib');
 PouchDB.plugin(Authentication);

@@ -1,6 +1,5 @@
-import { AuthError, getBaseUrl, getBasicAuthHeaders, getConfigUrl, wrapError } from './utils';
+import { AuthError, doFetch, getBaseUrl, getBasicAuthHeaders, getConfigUrl } from './utils';
 
-import ajaxCore from 'pouchdb-ajax';
 import { assign, toPromise } from 'pouchdb-utils';
 
 var getMembership = toPromise(function (opts, callback) {
@@ -13,10 +12,10 @@ var getMembership = toPromise(function (opts, callback) {
   var url = getBaseUrl(db) + '/_membership';
   var ajaxOpts = assign({
     method: 'GET',
-    url: url,
     headers: getBasicAuthHeaders(db),
   }, opts.ajax || {});
-  ajaxCore(ajaxOpts, wrapError(callback));
+
+  return doFetch(url, ajaxOpts, callback);
 });
 
 var signUpAdmin = toPromise(function (username, password, opts, callback) {
@@ -53,12 +52,12 @@ var signUpAdmin = toPromise(function (username, password, opts, callback) {
     var url = (opts.configUrl || configUrl) + '/admins/' + encodeURIComponent(username);
     var ajaxOpts = assign({
       method: 'PUT',
-      url: url,
       processData: false,
       headers: getBasicAuthHeaders(db),
       body: '"' + password + '"',
     }, opts.ajax || {});
-    ajaxCore(ajaxOpts, wrapError(callback));
+
+    return doFetch(url, ajaxOpts, callback);
   });
 });
 
@@ -93,11 +92,11 @@ var deleteAdmin = toPromise(function (username, opts, callback) {
     var url = (opts.configUrl || configUrl) + '/admins/' + encodeURIComponent(username);
     var ajaxOpts = assign({
       method: 'DELETE',
-      url: url,
       processData: false,
       headers: getBasicAuthHeaders(db),
     }, opts.ajax || {});
-    ajaxCore(ajaxOpts, wrapError(callback));
+
+    return doFetch(url, ajaxOpts, callback);
   });
 });
 
